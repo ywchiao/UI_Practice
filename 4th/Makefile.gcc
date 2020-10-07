@@ -1,0 +1,73 @@
+
+BIN=$(CURDIR).exe
+DBG=$(CURDIR)g.exe
+	@echo;$(DBG)
+#BIN=$(notdir $(CURDIR)).exe
+#DBG=$(notdir $(CURDIR))g.exe
+#BIN=$(notdir $(CURDIR))
+#DBG=$(BIN)g
+
+SRC=src
+INC=inc
+OBJ=obj/bin
+DBJ=obj/dbg
+LIB=lib
+OUT=bin
+
+INCLUDES=-I. -I$(INC) -D_GNU_SOURCE=1 -Dmain=SDL_main
+
+# -mwindows is for MinGW/GCC to tell linker to set PE format properly.
+# -lwinmm is Windows MultiMedia lib, used by SDL for precise timer.
+LIBS=$(SDL_LIBS) $(SDL_IMAGE) $(SDL_TTF) $(LUA_LIBS)
+
+CC=gcc
+CXX=g++
+
+CFLAGS= -std=gnu++0x -D__GNUWIN32__ -O2 -m32 -mthreads -pipe -Wall -Wextra
+CDEBUG= -std=gnu++0x -D__GNUWIN32__ -g -m32 -mthreads -pipe -Wall -Wextra
+#CFLAGS= -std=c++0x -D__GNUWIN32__ -D__WXMSW__ -DwxUSE_UNICODE -m32 -mthreads -pipe -Wall
+#CDEBUG= -std=c++0x -D__GNUWIN32__ -D__WXMSW__ -DwxUSE_UNICODE -g -m32 -mthreads -pipe -Wall
+
+LDFLAG= -mthreads -static -L$(LIB)
+
+SOURCES=$(wildcard $(SRC)/*.cpp)
+OBJS=$(notdir $(patsubst %.cpp,%.o,$(SOURCES)))
+BIN_OBJS=$(addprefix $(OBJ)/,$(OBJS))
+DBG_OBJS=$(addprefix $(DBJ)/,$(OBJS))
+
+# SDL setting
+SDL_LIBS=-lmingw32 -lSDLMain -lSDL -lwinmm -mwindows
+SDL_IMAGE=-lSDL_image -ltiff -ljpeg -lpng -lz
+SDL_TTF=-lSDL_ttf -lfreetype
+
+# LUA setting
+LUA_LIBS=-llua
+
+# implementation
+
+.SUFFIXES:
+.SUFFIXES: .o .cpp
+
+$(OBJ)/%.o: $(SRC)/%.cpp $(INC)/%.h
+	$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBJ)/%.o: $(SRC)/%.cpp $(INC)/%.h
+	$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
+
+.PHONY: clean
+
+all : release debug
+
+release: $(OUT)/$(BIN)
+
+$(OUT)/$(BIN): $(BIN_OBJS)
+	$(CXX) -o $(OUT)/$(BIN) $(BIN_OBJS) $(LDFLAG) $(LIBS)
+	strip $(OUT)/$(BIN)
+
+debug: $(OUT)/$(DBG)
+
+$(OUT)/$(DBG): $(DBG_OBJS)
+	$(CXX) -o $(OUT)/$(DBG) $(DBG_OBJS) $(LDFLAG) $(LIBS)
+
+clean:
+	rm -f $(OBJ)/*.o rm -f $(DBJ)/*.o

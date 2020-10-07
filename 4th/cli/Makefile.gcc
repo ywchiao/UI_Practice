@@ -1,0 +1,70 @@
+
+BIN=$(notdir $(CURDIR)).exe
+DBG=$(notdir $(CURDIR))g.exe
+
+SRC=src
+INC=inc
+OBJ=obj/bin
+DBJ=obj/dbg
+BLD=bin
+
+INCLUDES=-I. -I$(INC) -D_GNU_SOURCE=1
+
+# -mwindows is for MinGW/GCC to tell linker to set PE format properly.
+# -lwinmm is Windows MultiMedia lib, used by SDL for precise timer.
+LIBS=
+
+CC=gcc
+CXX=g++
+
+CFLAGS= -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -D__GNUWIN32__ -O2 -mconsole -pipe -Wall -Wextra
+CDEBUG= -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -D__GNUWIN32__ -g -mconsole -pipe -Wall -Wextra
+
+LDFLAG= -static
+
+C_SOURCES=$(wildcard $(SRC)/*.c)
+CPP_SOURCES=$(wildcard $(SRC)/*.cpp)
+OBJS=$(notdir $(C_SOURCES:.c=.o)) $(notdir $(CPP_SOURCES:.cpp=.o))
+BIN_OBJS=$(addprefix $(OBJ)/,$(OBJS))
+DBG_OBJS=$(addprefix $(DBJ)/,$(OBJS))
+
+# implementation
+
+$(OBJ)/%.o: $(SRC)/%.c
+	@echo $<: compiling ...
+	@$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBJ)/%.o: $(SRC)/%.c
+	@echo $<: compiling ...
+	@$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
+
+$(OBJ)/%.o: $(SRC)/%.cpp
+	@echo $<: compiling ...
+	@$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBJ)/%.o: $(SRC)/%.cpp
+	@echo $<: compiling ...
+	@$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
+
+.PHONY: clean
+
+all : release debug
+
+release: $(BLD)/$(BIN)
+
+$(BLD)/$(BIN): $(BIN_OBJS)
+	@echo linking ...
+	@$(CXX) -o $@ $(BIN_OBJS) $(LDFLAG) $(LIBS)
+	@strip $(BLD)/$(BIN)
+	@echo $@ built.
+
+debug: $(BLD)/$(DBG)
+
+$(BLD)/$(DBG): $(DBG_OBJS)
+	@echo linkng ...
+	@$(CXX) -o $@ $(DBG_OBJS) $(LDFLAG) $(LIBS)
+	@echo $@ built.
+
+clean:
+	@rm -f $(OBJ)/*.o @rm -f $(DBJ)/*.o
+	@echo build cleaned.

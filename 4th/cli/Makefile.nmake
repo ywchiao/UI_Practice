@@ -1,0 +1,78 @@
+
+PROJ=cli
+
+C_FILES= getopt.c
+
+CPP_FILES= getopt_sample.cpp
+
+BIN=$(PROJ).exe
+DBG=$(PROJ)g.exe
+
+SRC=src
+INC=inc
+OBJ=obj\bin
+DBJ=obj\dbg
+#LIB=lib
+BLD=bin
+
+INCLUDES= -I$(INC)
+
+LIBS=
+
+CC=cl
+CXX=cl
+
+CFLAGS= -nologo -c -EHsc -W4 /sdl -O2
+CDEBUG= -nologo -c -EHsc -W4 /sdl -DDEBUG -Zi -Od
+
+LDFLAG= -nologo
+
+{$(SRC)}.c{$(OBJ)}.obj:
+    @echo compiling ...
+    @$(CC) $(CFLAGS) $(INCLUDES) -c -Fo$(OBJ)/ $<
+
+{$(SRC)}.cpp{$(OBJ)}.obj:
+    @echo compiling ...
+    @$(CXX) $(CFLAGS) $(INCLUDES) -Fo$(OBJ)/ $<
+
+{$(SRC)}.c{$(DBJ)}.obj:
+    @echo compiling ...
+    @$(CC) $(CDEBUG) $(INCLUDES) -Fo$(DBJ)/ $<
+
+{$(SRC)}.cpp{$(DBJ)}.obj:
+    @echo compiling ...
+    @$(CXX) $(CDEBUG) $(INCLUDES) -Fo$(DBJ)/ $<
+
+#
+# To be a valid makefile it must have some rules to perform
+all: debug release
+
+release: pre_build $(BLD)/$(BIN)
+
+$(BLD)/$(BIN): $(OBJ)/$(C_FILES:.c=.obj) $(OBJ)/$(CPP_FILES:.cpp=.obj)
+    @echo linking ...
+	@echo $@
+    @$(CXX) $(LDFLAG) $** -Fe$@
+    @echo $@ built.
+
+$(OBJ)/*.obj: $(INC)/*.h
+
+debug: pre_build $(BLD)/$(DBG)
+
+$(BLD)/$(DBG): $(DBJ)/$(C_FILES:.c=.obj) $(DBJ)/$(CPP_FILES:.cpp=.obj)
+    @echo linking ...
+	@echo $@
+    @$(CXX) $(LDFLAG) $** -Fe$@
+    @echo $@ built.
+
+$(DBJ)/*.obj: $(INC)/*.h
+
+pre_build:
+    @if not exist $(BLD) mkdir $(BLD)
+    @if not exist $(OBJ) mkdir $(OBJ)
+    @if not exist $(DBJ) mkdir $(DBJ)
+
+clean:
+    @del /Q $(OBJ) $(DBJ)
+    @echo build cleaned.
+
