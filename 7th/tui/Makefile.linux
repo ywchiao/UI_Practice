@@ -20,19 +20,17 @@ BLD_NUMBER=build.number
 BIN=$(BLD)/$(PRJ).exe
 DBG=$(BLD)/$(PRJ)g.exe
 
-INCLUDES=-I. -I$(INC) -Ic:/pdcurses
+INCLUDES=-I. -I$(INC)
 
-# -mwindows is for MinGW/GCC to tell linker to set PE format properly.
-# -lwinmm is Windows MultiMedia lib, used by SDL for precise timer.
-LIBS=-l:pdcurses.a -lwinmm
+LIBS=-lncursesw
 
 CC=gcc
 CXX=g++
 
-CFLAGS= -std=c++17 -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -O2 -mconsole -pipe -Wall -Wextra $(VERSION_INFO)
-CDEBUG= -std=c++17 -D_GLIBCXX_ASSERTIONS -g -mconsole -pipe -Wall -Wextra $(VERSION_INFO)
+CFLAGS= -std=c++17 -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -O2 -pipe -Wall -Wextra $(VERSION_INfO)
+CDEBUG= -std=c++17 -D_GLIBCXX_ASSERTIONS -g -pipe -Wall -Wextra $(VERSION_INFO)
 
-LDFLAG= -Lc:/pdcurses/wincon #-static
+LDFLAG=
 
 VERSION_INFO= -DPROJECT_NAME=$(PRJ) \
           -DVERSION_MAJOR=$(MAJOR) \
