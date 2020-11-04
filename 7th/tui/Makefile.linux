@@ -17,8 +17,8 @@ DBJ=obj/dbg
 BLD=bin
 BLD_NUMBER=build.number
 
-BIN=$(BLD)/$(PRJ).exe
-DBG=$(BLD)/$(PRJ)g.exe
+BIN=$(BLD)/$(PRJ)
+DBG=$(BLD)/$(PRJ)g
 
 INCLUDES=-I. -I$(INC)
 
