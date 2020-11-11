@@ -11,17 +11,17 @@ void Base::say_hi() {
     std::endl;
 }
 
-
 class Derived : public Base {
-//  void say_hi();
+public:
+  void say_hi();
 };
-/*
+
 void Derived::say_hi() {
   std::cout <<
     "Hello from Derived." <<
     std::endl;
 }
-*/
+
 
 int main() {
     Derived derived;

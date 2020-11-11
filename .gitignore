@@ -114,7 +114,7 @@ __pycache__/
 *.dylib
 
 # Windows exe files
-*.exe
+#*.exe
 
 # generic files
 *~
