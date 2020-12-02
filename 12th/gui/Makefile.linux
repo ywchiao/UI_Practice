@@ -1,0 +1,100 @@
+
+#choose shell
+SHELL=sh
+
+#versioning
+MAJOR=0
+MINOR=1
+PATCH=0
+VERSION=$(MAJOR).$(MINOR).$(PATCH)
+
+PRJ=$(notdir $(CURDIR))
+
+SRC=src
+INC=inc
+OBJ=obj/bin
+DBJ=obj/dbg
+BLD=bin
+BLD_NUMBER=build.number
+
+BIN=$(BLD)/$(PRJ)
+DBG=$(BLD)/$(PRJ)g
+
+INCLUDES=-I. -I$(INC)
+
+LIBS=-lncursesw
+
+CC=gcc
+CXX=g++
+
+CFLAGS= -std=c++17 -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -O2 -pipe -Wall -Wextra $(VERSION_INfO)
+CDEBUG= -std=c++17 -D_GLIBCXX_ASSERTIONS -g -pipe -Wall -Wextra $(VERSION_INFO)
+
+LDFLAG=
+
+VERSION_INFO= -DPROJECT_NAME=$(PRJ) \
+          -DVERSION_MAJOR=$(MAJOR) \
+		  -DVERSION_MINOR=$(MINOR) \
+		  -DVERSION_PATCH=$(PATCH) \
+		  -DBUILD_NUMBER=$(shell cat $(BLD_NUMBER)) \
+		  -DBUILD_TIME=$(shell date +'%H:%M:%S') \
+		  -DBUILD_DATE=$(shell date +'%m/%d/%Y')
+
+SOURCES=$(wildcard $(SRC)/*.cpp)
+OBJS=$(notdir $(SOURCES:.cpp=.o))
+BIN_OBJS=$(addprefix $(OBJ)/,$(OBJS))
+DBG_OBJS=$(addprefix $(DBJ)/,$(OBJS))
+
+# pkg-config --cflags
+#3RD_CFLAGS=$(shell pkg-config --cflags 3rd-lib)
+
+# pkg-config --libs
+#3RD_LIBS= $(shell pkg-config --libs 3rd-lib)
+
+# implementation
+
+$(OBJ)/%.o: $(SRC)/%.cpp
+	@echo $<: compiling ...
+	@$(CXX) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(DBJ)/%.o: $(SRC)/%.cpp
+	@echo $<: compiling ...
+	@$(CXX) $(CDEBUG) $(INCLUDES) -c $< -o $@
+
+.PHONY: clean
+
+all : debug release
+
+release: pre_build $(BIN) $(BLD_NUMBER)
+
+$(BIN): $(BIN_OBJS)
+	@echo linking ...
+	@$(CXX) -o $@ $(BIN_OBJS) $(LDFLAG) $(LIBS)
+	@strip $(BIN)
+	@echo $@ built.
+
+$(BIN_OBJS): $(INC)/*.h
+
+debug: pre_build $(DBG) $(BLD_NUMBER)
+
+$(DBG): $(DBG_OBJS)
+	@echo linking ...
+	@$(CXX) -o $@ $(DBG_OBJS) $(LDFLAG) $(LIBS)
+	@echo $@ built.
+
+$(DBG_OBJS): $(INC)/*.h
+
+$(BLD_NUMBER): $(DBG) $(BIN)
+	@echo $$(($$(cat $(BLD_NUMBER)) + 1)) > $(BLD_NUMBER)
+
+pre_build:
+	@if ! test -f $(SRC); then mkdir -p $(SRC); fi
+	@if ! test -f $(INC); then mkdir -p $(INC); fi
+	@if ! test -f $(OBJ); then mkdir -p $(OBJ); fi
+	@if ! test -f $(DBJ); then mkdir -p $(DBJ); fi
+	@if ! test -f $(BLD); then mkdir -p $(BLD); fi
+	@if ! test -f $(BLD_NUMBER); then echo 0 > $(BLD_NUMBER); fi
+
+clean:
+	@rm -f $(OBJ)/*.o @rm -f $(DBJ)/*.o
+	@echo build cleaned.
