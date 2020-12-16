@@ -1,0 +1,110 @@
+
+PRJ=gui
+
+#choose shell
+SHELL=cmd
+
+#versioning
+MAJOR=0
+MINOR=1
+PATCH=0
+VERSION=$(MAJOR).$(MINOR).$(PATCH)
+
+SRC=src
+INC=inc
+OBJ=obj\bin
+DBJ=obj\dbg
+#LIB=lib
+BLD=bin
+BLD_NUMBER=build.number
+
+BIN=$(BLD)\$(PRJ).exe
+DBG=$(BLD)\$(PRJ)g.exe
+
+INCLUDES= -I$(INC) -Ic:/usr/include -DSDL_MAIN_HANDLED
+
+LIBS=-link -LIBPATH:"c:\usr\lib\x64" $(SDL_LIBS) $(SDL_IMAGE) $(SDL_TTF) $(WIN32_LIB)
+
+CC=cl
+CXX=cl
+
+CFLAGS= -std:c++17 -nologo -utf-8 -c -EHsc -W4 -O2 $(VERSION_INFO)
+CDEBUG= -std:c++17 -nologo -utf-8 -c -EHsc -W4 -DDEBUG -Zi -Od $(VERSION_INFO)
+
+LDFLAG= -nologo
+
+# W32 setting
+W32_LIB= user32.lib gdi32.lib advapi32.lib
+
+# SDL setting
+SDL_LIBS=SDL2Main.lib SDL2.lib
+SDL_IMAGE=SDL2_image.lib
+SDL_TTF=SDL2_ttf.lib
+
+B_NUMBER = \
+!INCLUDE build.number
+
+!IF [time /t > build.time] == 0
+B_TIME = \
+!INCLUDE build.time
+!ENDIF
+
+!IF [date /t > build.date] == 0
+B_DATE = \
+!INCLUDE build.date
+!ENDIF
+
+VERSION_INFO= -DPROJECT_NAME=$(PRJ) \
+          -DVERSION_MAJOR=$(MAJOR) \
+		  -DVERSION_MINOR=$(MINOR) \
+		  -DVERSION_PATCH=$(PATCH) \
+	 	  -DBUILD_NUMBER=$(B_NUMBER) \
+		  -DBUILD_TIME=$(B_TIME) \
+		  -DBUILD_DATE=$(B_DATE)
+
+{$(SRC)}.cpp{$(OBJ)}.obj:
+	@echo $<:compiling ...
+	@$(CXX) $(CFLAGS) $(INCLUDES) -c -Fo$(OBJ)\ $<
+
+{$(SRC)}.cpp{$(DBJ)}.obj:
+	@echo $<:compiling ...
+	@$(CXX) $(CDEBUG) $(INCLUDES) -c -Fo$(DBJ)\ $<
+
+#
+# To be a valid makefile it must have some rules to perform
+all: debug release
+
+release: pre_build $(BIN) $(BLD_NUMBER)
+
+$(BIN): $(OBJ)/*.obj
+    @echo linking $@...
+	@$(CXX) $(LDFLAG) $** -Fe$@ $(LIBS)
+    @echo $@ built.
+
+$(OBJ)/*.obj: $(INC)/*.h
+
+debug: pre_build $(DBG) $(BLD_NUMBER)
+
+$(DBG): $(DBJ)/*.obj
+    @echo linking $@...
+	@$(CXX) $(LDFLAG) $** -Fe$@ $(LIBS)
+    @echo $@ built.
+
+$(DBJ)/*.obj: $(INC)/*.h
+
+$(BLD_NUMBER): $(DBG) $(BIN)
+	@set /A B_NUMBER=$(B_NUMBER) + 1
+	@echo %%B_NUMBER%% > $(BLD_NUMBER)
+
+pre_build:
+    @if not exist $(SRC) mkdir $(SRC)
+    @if not exist $(INC) mkdir $(INC)
+    @if not exist $(BLD) mkdir $(BLD)
+    @if not exist $(OBJ) mkdir $(OBJ)
+    @if not exist $(DBJ) mkdir $(DBJ)
+	@if not exist $(BLD_NUMBER) echo 0 > $(BLD_NUMBER)
+
+clean:
+    @del /Q $(OBJ) $(DBJ)
+    @echo build cleaned.
+

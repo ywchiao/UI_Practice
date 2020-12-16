@@ -94,6 +94,7 @@ void App::hello() {
     rect.w = 512;
     rect.h = 128;
 
+    SDL_RenderClear(renderer_);
     SDL_RenderCopy(renderer_, hello, nullptr, &rect);
     SDL_RenderPresent(renderer_);
 } // App::hello()
