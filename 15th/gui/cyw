@@ -1,0 +1,22 @@
+In file included from C:/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++/memory:67,
+                 from inc/app.h:6,
+                 from src/app.cpp:12:
+C:/TDM-GCC-64/lib/gcc/x86_64-w64-mingw32/9.2.0/include/c++/bits/stl_raw_storage_iter.h:59:1: error: expected ',' or ';' before 'namespace'
+   59 | namespace std _GLIBCXX_VISIBILITY(default)
+      | ^~~~~~~~~
+src/app.cpp: In member function 'int App::on_left_click_(std::shared_ptr<Event>)':
+src/app.cpp:337:48: warning: unused parameter 'e' [-Wunused-parameter]
+  337 | int App::on_left_click_(std::shared_ptr<Event> e) {
+      |                         ~~~~~~~~~~~~~~~~~~~~~~~^
+src/app.cpp: In member function 'int App::on_right_click_(std::shared_ptr<Event>)':
+src/app.cpp:358:49: warning: unused parameter 'e' [-Wunused-parameter]
+  358 | int App::on_right_click_(std::shared_ptr<Event> e) {
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~^
+src/app.cpp: In member function 'void App::get_input_()':
+src/app.cpp:206:17: warning: this statement may fall through [-Wimplicit-fallthrough=]
+  206 |                 if (e.window.event != SDL_WINDOWEVENT_CLOSE) {
+      |                 ^~
+src/app.cpp:210:13: note: here
+  210 |             case SDL_QUIT:
+      |             ^~~~
+mingw32-make: *** [obj/dbg/app.o] Error 1
